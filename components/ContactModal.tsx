@@ -9,6 +9,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useEffect, useState } from "react";
 import { formatDateForInput } from "@/utils/date";
+import { Button } from "./ui/button";
 
 interface ContactModalProps {
   currentContact: Contact | null;
@@ -56,6 +57,10 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
             <Label htmlFor="picture">Picture</Label>
             <Input id="picture" type="file" />
           </div>
+        </div>
+        <div className="flex flex-row gap-2">
+          <Button>Save</Button>
+          <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
         </div>
       </DialogContent>
     </Dialog>
