@@ -120,3 +120,32 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Style for date input to push the calendar icon to the right */
+input[type="date"] {
+  padding-right: 2.5rem; /* Add space for the icon */
+  position: relative;
+}
+
+/* For WebKit browsers (Chrome, Safari, Edge) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  height: 1.5em;
+  width: 1.5em;
+}
+
+/* Optional: Remove default background for the icon for a cleaner look */
+input[type="date"]::-webkit-input-placeholder {
+  color: #aaa;
+}
+input[type="date"]::-ms-input-placeholder {
+  color: #aaa;
+}
+input[type="date"]::placeholder {
+  color: #aaa;
+}
+
