@@ -10,6 +10,7 @@ import { Input } from "./ui/input";
 import { useEffect, useState } from "react";
 import { formatDateForInput } from "@/utils/date";
 import { Button } from "./ui/button";
+import { useSupabaseOperations } from "@/hooks/useSupabaseOperations";
 
 interface ContactModalProps {
   currentContact: Contact | null;
@@ -19,6 +20,7 @@ interface ContactModalProps {
 
 export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModalProps) => {
   const isEditing = !!currentContact;
+  const { insertData, updateData } = useSupabaseOperations();
   const [name, setName] = useState("");
   const [lastContactDate, setLastContactDate] = useState("");
 
@@ -27,6 +29,31 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
     setLastContactDate(formatDateForInput(currentContact?.last_contact_date || ""));
   }, [currentContact]);
   
+  const handleSave = async () => {
+    try {
+      await insertData({
+        name,
+        last_contact_date: lastContactDate,
+      });
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error inserting data:", error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await updateData({
+        id: currentContact?.id || "",
+        name,
+        last_contact_date: lastContactDate,
+      });
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating data:", error);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="w-full max-w-sm min-h-[400px] flex flex-col gap-4">
@@ -59,7 +86,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
           </div>
         </div>
         <div className="flex flex-row gap-2">
-          <Button>Save</Button>
+          <Button onClick={isEditing ? handleUpdate : handleSave}>Save</Button>
           <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
         </div>
       </DialogContent>
