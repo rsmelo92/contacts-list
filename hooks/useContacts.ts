@@ -67,15 +67,22 @@ export const useUpdateContact = () => {
         if (!avatarData) {
           return data.avatar_url;
         }
+        
         const { publicUrl } = await uploadImage(avatarData, storage);
+        
+        // Delete the old image if it exists
         if (data.avatar_url && publicUrl) {
-          const filePath = extractFilePath(data.avatar_url);
-          const { error } = await storage.remove([filePath]);
-          if (error) {
-            console.error("Error deleting file:", error);
-            throw error;
+          try {
+            const filePath = extractFilePath(data.avatar_url);
+            const { error: removeError } = await storage.remove([filePath]);
+            if (removeError) {
+              console.error("Error deleting old file:", removeError);
+            }
+          } catch (error) {
+            console.error("Error in file deletion process:", error);
           }
         }
+        
         return publicUrl;
       };
 
@@ -120,9 +127,17 @@ export const useDeleteContact = () => {
         throw new Error(`Failed to delete contact: ${error.message}`);
       }
 
+      // Delete the avatar image from storage if it exists
       if (deletedData[0].avatar_url) {
-        const filePath = extractFilePath(deletedData[0].avatar_url);
-        await storage.remove([filePath]);
+        try {
+          const filePath = extractFilePath(deletedData[0].avatar_url);
+          const { error: removeError } = await storage.remove([filePath]);
+          if (removeError) {
+            console.error("Error deleting file from storage:", removeError);
+          }
+        } catch (error) {
+          console.error("Error in file deletion process:", error);
+        }
       }
 
       return deletedData[0];
