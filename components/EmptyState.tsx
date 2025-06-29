@@ -41,8 +41,6 @@ export const EmptyState = () => {
           <rect x="85" y="85" width="20" height="3" rx="1" fill="#94a3b8" />
           <rect x="85" y="90" width="25" height="3" rx="1" fill="#94a3b8" />
           
-          {/* Phone button */}
-          <circle cx="100" cy="155" r="8" fill="#ffffff" />
           
           {/* Plus sign for adding contacts */}
           <g transform="translate(130, 50)">
@@ -59,7 +57,7 @@ export const EmptyState = () => {
             <rect x="6" y="20" width="13" height="2" rx="1" fill="#94a3b8" />
           </g>
           
-          <g transform="translate(150, 120)">
+          <g transform="translate(150, 110)">
             <rect x="0" y="0" width="25" height="35" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" opacity="0.5" />
             <circle cx="12.5" cy="10" r="3" fill="#94a3b8" />
             <rect x="8" y="16" width="9" height="2" rx="1" fill="#94a3b8" />
