@@ -7,7 +7,7 @@ export default async function Home() {
   const { data: contacts } = await supabase
     .from("contacts")
     .select()
-    .order("last_contact_date", { ascending: true });
+    .order("last_contact_date", { ascending: false });
   
   return (
     <main className="flex flex-col items-center justify-center h-screen bg-blue-50">

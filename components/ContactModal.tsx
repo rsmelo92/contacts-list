@@ -26,6 +26,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
   const [name, setName] = useState("");
   const [lastContactDate, setLastContactDate] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{ name?: boolean; date?: boolean }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setName(currentContact?.name || "");
@@ -54,6 +55,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
       return;
     }
 
+    setIsLoading(true);
     try {
       await insertData({
         name,
@@ -63,6 +65,8 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
     } catch (error) {
       console.error("Error inserting data:", error);
       toast.warning("Failed to save contact. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,6 +91,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
       return;
     }
 
+    setIsLoading(true);
     try {
       await updateData({
         id: currentContact?.id || "",
@@ -97,6 +102,21 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
     } catch (error) {
       console.error("Error updating data:", error);
       toast.warning("Failed to update contact. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsLoading(true);
+    try {
+      await deleteData(currentContact?.id || "");
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error deleting data:", error);
+      toast.warning("Failed to delete contact. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -120,6 +140,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
               onChange={(e) => setName(e.target.value)} 
               onFocus={() => clearFieldError('name')}
               className={fieldErrors.name ? "border-red-500 focus:border-red-500" : ""}
+              disabled={isLoading}
             />
           </div>
           <div className="grid w-full max-w-sm items-center gap-3">
@@ -131,23 +152,28 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
               onChange={(e) => setLastContactDate(e.target.value)}
               className={`date-input ${fieldErrors.date ? "border-red-500 focus:border-red-500" : ""}`}
               onFocus={() => clearFieldError('date')}
+              max={new Date().toISOString().split('T')[0]}
+              disabled={isLoading}
             />
           </div>
           <div className="grid w-full max-w-sm items-center gap-3">
             <Label htmlFor="picture">Picture</Label>
-            <Input id="picture" type="file" />
+            <Input id="picture" type="file" disabled={isLoading} />
           </div>
         </div>
         <div className="flex flex-row gap-2 justify-between">
           <div className="flex flex-row gap-2">
-            <Button onClick={isEditing ? handleUpdate : handleSave}>Save</Button>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button onClick={isEditing ? handleUpdate : handleSave} disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save"}
+            </Button>
+            <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isLoading}>Cancel</Button>
           </div>
             {isEditing && (
               <Button 
                 variant="ghost" 
-                onClick={() => deleteData(currentContact?.id || "")}
+                onClick={handleDelete}
                 title="Delete contact"
+                disabled={isLoading}
               >
                 <Trash2 className="w-4 h-4 text-red-500" />
               </Button>
