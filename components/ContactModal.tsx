@@ -185,7 +185,6 @@ export const ContactModal = ({ currentContact, isOpen, onClose }: ContactModalPr
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        console.log({file});
                         const imageUrl = URL.createObjectURL(file);
                         setImagePreview(imageUrl);
                         setAvatarData(file);
