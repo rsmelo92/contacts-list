@@ -33,7 +33,7 @@
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/rsmelo92/contacts-list
    cd contacts-list
    ```
 
