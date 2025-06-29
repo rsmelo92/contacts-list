@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/utils/supabase/client";
+import { supabase } from "@/lib/supabase/client";
+import { extractFilePath, uploadImage } from "@/utils/supabase";
 import type { Contact } from "@/types";
-import { extractFilePath, uploadImage } from "@/utils/supabase/logic";
 
 export const useContacts = () => {
   const fetchContacts = async (): Promise<Contact[]> => {
