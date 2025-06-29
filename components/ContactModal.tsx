@@ -109,8 +109,8 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
         id: currentContact?.id || "",
         name,
         last_contact_date: lastContactDate,
-        // avatar_url: avatarData,
-      });
+        avatar_url: currentContact?.avatar_url || "",
+      }, avatarData);
       setIsOpen(false);
     } catch (error) {
       console.error("Error updating data:", error);
