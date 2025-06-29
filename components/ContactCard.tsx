@@ -20,8 +20,10 @@ export const ContactCard = ({ contact, onClick }: ContactCardProps) => {
       <CardContent className="flex flex-col gap-2">
         <div className="flex items-center gap-4">
           <Avatar>
-            <AvatarImage src={contact.avatar_url} />
-            <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
+            <AvatarImage className="object-cover rounded-full h-8 w-8" width={32} height={32} src={contact.avatar_url} />
+            <AvatarFallback>
+              <div className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full">{contact.name.charAt(0)}</div>
+            </AvatarFallback>
           </Avatar>
           <div className="flex flex-1 flex-row gap-1 justify-between">
             <p className="truncate flex-1 max-w-[80px] md:max-w-full">{contact.name}</p>

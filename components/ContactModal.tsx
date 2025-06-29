@@ -13,6 +13,7 @@ import { Button } from "./ui/button";
 import { useSupabaseOperations } from "@/hooks/useSupabaseOperations";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 interface ContactModalProps {
   currentContact: Contact | null;
@@ -25,12 +26,15 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
   const { insertData, updateData, deleteData } = useSupabaseOperations();
   const [name, setName] = useState("");
   const [lastContactDate, setLastContactDate] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<{ name?: boolean; date?: boolean }>({});
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ name?: boolean; date?: boolean; avatar?: boolean }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [avatarData, setAvatarData] = useState<File | null>(null);
 
   useEffect(() => {
     setName(currentContact?.name || "");
     setLastContactDate(formatDateForInput(currentContact?.last_contact_date || ""));
+    setImagePreview(currentContact?.avatar_url || null);
     setFieldErrors({}); // Clear errors when modal opens
   }, [currentContact]);
   
@@ -39,7 +43,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
     setFieldErrors({});
     
     // Validate fields before saving
-    const errors: { name?: boolean; date?: boolean } = {};
+    const errors: { name?: boolean; date?: boolean; avatar?: boolean } = {};
     
     if (!name.trim()) {
       errors.name = true;
@@ -48,6 +52,10 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
     if (!lastContactDate) {
       errors.date = true;
       toast.warning("Last contact date is required");
+    }
+    if (!avatarData) {
+      errors.avatar = true;
+      toast.warning("Contact picture is required");
     }
     
     if (Object.keys(errors).length > 0) {
@@ -60,7 +68,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
       await insertData({
         name,
         last_contact_date: lastContactDate,
-      });
+      }, avatarData);
       setIsOpen(false);
     } catch (error) {
       console.error("Error inserting data:", error);
@@ -75,7 +83,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
     setFieldErrors({});
     
     // Validate fields before updating
-    const errors: { name?: boolean; date?: boolean } = {};
+    const errors: { name?: boolean; date?: boolean; avatar?: boolean } = {};
     
     if (!name.trim()) {
       errors.name = true;
@@ -84,6 +92,10 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
     if (!lastContactDate) {
       errors.date = true;
       toast.warning("Last contact date is required");
+    }
+    if (!avatarData && !currentContact?.avatar_url) {
+      errors.avatar = true;
+      toast.warning("Contact picture is required");
     }
     
     if (Object.keys(errors).length > 0) {
@@ -97,6 +109,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
         id: currentContact?.id || "",
         name,
         last_contact_date: lastContactDate,
+        // avatar_url: avatarData,
       });
       setIsOpen(false);
     } catch (error) {
@@ -120,7 +133,7 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
     }
   };
 
-  const clearFieldError = (field: 'name' | 'date') => {
+  const clearFieldError = (field: 'name' | 'date' | 'avatar') => {
     setFieldErrors(prev => ({ ...prev, [field]: false }));
   };
 
@@ -156,17 +169,55 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
               disabled={isLoading}
             />
           </div>
-          <div className="grid w-full max-w-sm items-center gap-3">
-            <Label htmlFor="picture">Picture</Label>
-            <Input id="picture" type="file" disabled={isLoading} />
+          <div className="flex flex-row gap-6 items-end">
+            <div className="grid w-full max-w-sm items-center gap-3">
+              <Label htmlFor="picture">Picture</Label>
+                <div className={`flex pr-3 flex-row gap-6 items-center p-2 border rounded-md ${fieldErrors.avatar ? "border-red-500" : "border-gray-200"}`}>
+                  <Input 
+                    id="picture" 
+                    type="file" 
+                    disabled={isLoading} 
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        console.log({file});
+                        const imageUrl = URL.createObjectURL(file);
+                        setImagePreview(imageUrl);
+                        setAvatarData(file);
+                        clearFieldError('avatar');
+                      }
+                    }}
+                  />
+                  <Avatar>
+                    <AvatarImage 
+                      className="object-cover rounded-full w-8 h-7" 
+                      width={32} 
+                      height={32} 
+                      src={imagePreview || undefined} 
+                    />
+                    <AvatarFallback>
+                      <div className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full">{name?.charAt(0)}</div>
+                    </AvatarFallback>
+                  </Avatar>
+              </div>
+            </div>
           </div>
         </div>
         <div className="flex flex-row gap-2 justify-between">
           <div className="flex flex-row gap-2">
-            <Button onClick={isEditing ? handleUpdate : handleSave} disabled={isLoading}>
+            <Button 
+              onClick={isEditing ? handleUpdate : handleSave} 
+              disabled={isLoading}
+            >
               {isLoading ? "Saving..." : "Save"}
             </Button>
-            <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isLoading}>Cancel</Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsOpen(false)} 
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
           </div>
             {isEditing && (
               <Button 
