@@ -6,8 +6,13 @@ import { ContactCard } from './ContactCard'
 import { Button } from './ui/button'
 import { ContactModal } from './ContactModal'
 import type { Contact } from '@/types'
+import { EmptyState } from './EmptyState'
 
-export const ContactView = ({ contacts }: { contacts: Contact[] }) => {
+interface ContactViewProps {
+  contacts: Contact[];
+}
+
+export const ContactView = ({ contacts }: ContactViewProps) => {
   const [currentContact, setCurrentContact] = useState<Contact | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -15,6 +20,7 @@ export const ContactView = ({ contacts }: { contacts: Contact[] }) => {
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4">Contacts</h1>
         <ScrollArea className="h-[500px] max-w-[500px] md:w-[500px] sm:w-full flex flex-col gap-4 p-2">
+          {contacts.length === 0 && <EmptyState />}
           {contacts?.map((contact: Contact) => (
             <ContactCard 
               key={contact.id} 

@@ -14,6 +14,7 @@ import { useSupabaseOperations } from "@/hooks/useSupabaseOperations";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { ConfirmationDialog } from "./ConfirmationDialog";
 
 interface ContactModalProps {
   currentContact: Contact | null;
@@ -220,14 +221,16 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
             </Button>
           </div>
             {isEditing && (
-              <Button 
-                variant="ghost" 
-                onClick={handleDelete}
+              <ConfirmationDialog
                 title="Delete contact"
-                disabled={isLoading}
-              >
-                <Trash2 className="w-4 h-4 text-red-500" />
-              </Button>
+                description="Are you sure you want to delete this contact?"
+                onConfirm={handleDelete}
+                trigger={
+                  <Button variant="ghost" title="Delete contact" disabled={isLoading}>
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                }
+              />
             )}
         </div>
       </DialogContent>
