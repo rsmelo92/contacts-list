@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { formatDateForInput } from "@/utils/date";
 import { Button } from "./ui/button";
 import { useSupabaseOperations } from "@/hooks/useSupabaseOperations";
+import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 
 interface ContactModalProps {
   currentContact: Contact | null;
@@ -20,16 +22,38 @@ interface ContactModalProps {
 
 export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModalProps) => {
   const isEditing = !!currentContact;
-  const { insertData, updateData } = useSupabaseOperations();
+  const { insertData, updateData, deleteData } = useSupabaseOperations();
   const [name, setName] = useState("");
   const [lastContactDate, setLastContactDate] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ name?: boolean; date?: boolean }>({});
 
   useEffect(() => {
     setName(currentContact?.name || "");
     setLastContactDate(formatDateForInput(currentContact?.last_contact_date || ""));
+    setFieldErrors({}); // Clear errors when modal opens
   }, [currentContact]);
   
   const handleSave = async () => {
+    // Clear previous errors
+    setFieldErrors({});
+    
+    // Validate fields before saving
+    const errors: { name?: boolean; date?: boolean } = {};
+    
+    if (!name.trim()) {
+      errors.name = true;
+      toast.warning("Contact name is required");
+    }
+    if (!lastContactDate) {
+      errors.date = true;
+      toast.warning("Last contact date is required");
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
     try {
       await insertData({
         name,
@@ -38,10 +62,31 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
       setIsOpen(false);
     } catch (error) {
       console.error("Error inserting data:", error);
+      toast.warning("Failed to save contact. Please try again.");
     }
   };
 
   const handleUpdate = async () => {
+    // Clear previous errors
+    setFieldErrors({});
+    
+    // Validate fields before updating
+    const errors: { name?: boolean; date?: boolean } = {};
+    
+    if (!name.trim()) {
+      errors.name = true;
+      toast.warning("Contact name is required");
+    }
+    if (!lastContactDate) {
+      errors.date = true;
+      toast.warning("Last contact date is required");
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
     try {
       await updateData({
         id: currentContact?.id || "",
@@ -51,7 +96,12 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
       setIsOpen(false);
     } catch (error) {
       console.error("Error updating data:", error);
+      toast.warning("Failed to update contact. Please try again.");
     }
+  };
+
+  const clearFieldError = (field: 'name' | 'date') => {
+    setFieldErrors(prev => ({ ...prev, [field]: false }));
   };
 
   return (
@@ -68,6 +118,8 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
               type="text" 
               value={name} 
               onChange={(e) => setName(e.target.value)} 
+              onFocus={() => clearFieldError('name')}
+              className={fieldErrors.name ? "border-red-500 focus:border-red-500" : ""}
             />
           </div>
           <div className="grid w-full max-w-sm items-center gap-3">
@@ -77,7 +129,8 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
               type="date"
               value={lastContactDate}
               onChange={(e) => setLastContactDate(e.target.value)}
-              className="date-input"
+              className={`date-input ${fieldErrors.date ? "border-red-500 focus:border-red-500" : ""}`}
+              onFocus={() => clearFieldError('date')}
             />
           </div>
           <div className="grid w-full max-w-sm items-center gap-3">
@@ -85,9 +138,20 @@ export const ContactModal = ({ currentContact, isOpen, setIsOpen }: ContactModal
             <Input id="picture" type="file" />
           </div>
         </div>
-        <div className="flex flex-row gap-2">
-          <Button onClick={isEditing ? handleUpdate : handleSave}>Save</Button>
-          <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+        <div className="flex flex-row gap-2 justify-between">
+          <div className="flex flex-row gap-2">
+            <Button onClick={isEditing ? handleUpdate : handleSave}>Save</Button>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+          </div>
+            {isEditing && (
+              <Button 
+                variant="ghost" 
+                onClick={() => deleteData(currentContact?.id || "")}
+                title="Delete contact"
+              >
+                <Trash2 className="w-4 h-4 text-red-500" />
+              </Button>
+            )}
         </div>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,5 @@
 "use client";
+import { Toaster } from "@/components/ui/sonner"
 import { ScrollArea } from './ui/scroll-area'
 import React, { useState } from 'react'
 import { ContactCard } from './ContactCard'
@@ -41,6 +42,7 @@ export const ContactView = ({ contacts }: { contacts: Contact[] }) => {
         isOpen={isOpen} 
         setIsOpen={setIsOpen} 
       />
+      <Toaster expand />
     </>
   )
 }
