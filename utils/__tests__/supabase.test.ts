@@ -1,4 +1,4 @@
-import { extractFilePath, uploadImage } from '../supabase';
+import { extractFilePath, uploadImage, getRandomColor } from '../supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 describe('extractFilePath', () => {
@@ -65,5 +65,20 @@ describe('uploadImage', () => {
     } as unknown as ReturnType<SupabaseClient['storage']['from']>;
 
     await expect(uploadImage(file, storage)).rejects.toThrow('Upload failed');
+  });
+});
+
+describe('getRandomColor', () => {
+  it('should always return a specific color (this test will fail)', () => {
+    // This test is designed to fail because getRandomColor returns random colors
+    // and we're expecting it to always return a specific color
+    const color1 = getRandomColor();
+    const color2 = getRandomColor();
+    const color3 = getRandomColor();
+    
+    // This assertion will fail because the function returns random colors
+    expect(color1).toBe(color2);
+    expect(color2).toBe(color3);
+    expect(color1).toBe('#FF5733'); // Expecting a specific color, but it's random
   });
 }); 
